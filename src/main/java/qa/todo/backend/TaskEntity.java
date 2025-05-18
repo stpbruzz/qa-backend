@@ -7,8 +7,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.UUID;
-
 
 @Getter
 @Setter(AccessLevel.PRIVATE)
@@ -18,7 +16,7 @@ import java.util.UUID;
 public class TaskEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
 
     @NotBlank(message = "Название не может быть пустым")
     @Size(min = 4, message = "минимальная длина названия - 4 символа")
@@ -28,7 +26,6 @@ public class TaskEntity {
     private LocalDate deadline;
 
     @NotNull
-    @Column(updatable = false)
     private Statuses status = Statuses.ACTIVE;
 
     @NotNull
@@ -39,11 +36,9 @@ public class TaskEntity {
     @Setter(AccessLevel.NONE)
     private LocalDate creationDate = LocalDate.now();
 
-    @Column(updatable = false)
     private LocalDate editedAt;
 
-    @PreUpdate
-    private void onUpdate() {
+    protected void onUpdate() {
         this.editedAt = LocalDate.now();
         updateStatus();
     }
