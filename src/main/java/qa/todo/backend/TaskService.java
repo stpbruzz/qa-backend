@@ -3,6 +3,7 @@ package qa.todo.backend;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -10,12 +11,13 @@ import java.util.List;
 public class TaskService {
     private final TaskRepository taskRepository;
 
-    public TaskEntity createTask(CreateTaskDTO taskDTO) {
+    public TaskEntity createTask(TaskDTO taskDTO) {
         TaskEntity newTask = new TaskEntity();
-        newTask.setName(taskDTO.getName());
+
+        newTask.setPriority(taskDTO.getPriority() != null ? taskDTO.getPriority() : MacroProcessor.parsePriority(taskDTO.getName()));
+        newTask.setDeadline(taskDTO.getDeadline() != null ? taskDTO.getDeadline() : MacroProcessor.parseDeadline(taskDTO.getName()));
+        newTask.setName(MacroProcessor.clearName(taskDTO.getName()));
         newTask.setDescription(taskDTO.getDescription());
-        newTask.setDeadline(taskDTO.getDeadline());
-        newTask.setPriority(taskDTO.getPriority());
 
         return taskRepository.save(newTask);
     }
@@ -44,28 +46,41 @@ public class TaskService {
                 .orElseThrow(() -> new Exceptions.TaskNotFoundException(String.format("Задача с id: %s не найдена", id)));
     }
 
-    public TaskEntity updateTask(String id, UpdateTaskDTO updateTaskDTO) {
-        TaskEntity task = taskRepository.findById(id)
-                .orElseThrow(() -> new Exceptions.TaskNotFoundException(String.format("Задача с id: %s не найдена", id)));
+    public TaskEntity updateTask(String id, TaskDTO taskDTO) {
+        TaskEntity task = findById(id);
 
-        if (updateTaskDTO.getName() != null) {
-            task.setName(updateTaskDTO.getName());
+        if (taskDTO.getName() != null) {
+            String newName = MacroProcessor.clearName(taskDTO.getName());
+            if (!newName.equals(task.getName())) {
+                task.setName(newName);
+
+                if (taskDTO.getPriority() == null) {
+                    Priorities parsedPriority = MacroProcessor.parsePriority(taskDTO.getName());
+                    if (parsedPriority != task.getPriority()) {
+                        task.setPriority(parsedPriority);
+                    }
+                }
+
+                if (taskDTO.getDeadline() == null) {
+                    LocalDate parsedDeadline = MacroProcessor.parseDeadline(taskDTO.getName());
+                    if (parsedDeadline != null && !parsedDeadline.equals(task.getDeadline())) {
+                        task.setDeadline(parsedDeadline);
+                    }
+                }
+            }
         }
 
-        if (updateTaskDTO.getDescription() != null) {
-            task.setDescription(updateTaskDTO.getDescription());
+        if (taskDTO.getPriority() != null) {
+            task.setPriority(taskDTO.getPriority());
         }
-
-        if (updateTaskDTO.getDeadline() != null) {
-            task.setDeadline(updateTaskDTO.getDeadline());
+        if (taskDTO.getDeadline() != null) {
+            task.setDeadline(taskDTO.getDeadline());
         }
-
-        if (updateTaskDTO.getPriority() != null) {
-            task.setPriority(updateTaskDTO.getPriority());
+        if (taskDTO.getDescription() != null) {
+            task.setDescription(taskDTO.getDescription());
         }
 
         task.onUpdate();
-
         return taskRepository.save(task);
     }
 

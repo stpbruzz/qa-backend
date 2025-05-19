@@ -29,7 +29,7 @@ public class TaskEntity {
     private Statuses status = Statuses.ACTIVE;
 
     @NotNull
-    private Priorities priority = Priorities.MEDIUM;
+    private Priorities priority;
 
     @NotNull
     @Column(updatable = false)
@@ -61,11 +61,18 @@ public class TaskEntity {
 
     private void updateStatus() {
         if (this.status == Statuses.COMPLETED || this.status == Statuses.LATE) {
+            if (this.deadline != null && LocalDate.now().isAfter(this.deadline)) {
+                this.status = Statuses.LATE;
+            } else {
+                this.status = Statuses.COMPLETED;
+            }
             return;
         }
 
         if (this.deadline != null && LocalDate.now().isAfter(this.deadline)) {
             this.status = Statuses.OVERDUE;
+        } else {
+            this.status = Statuses.ACTIVE;
         }
     }
 
