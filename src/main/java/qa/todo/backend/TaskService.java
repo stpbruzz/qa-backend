@@ -3,7 +3,6 @@ package qa.todo.backend;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -11,7 +10,7 @@ import java.util.List;
 public class TaskService {
     private final TaskRepository taskRepository;
 
-    public TaskEntity createTask(TaskDTO taskDTO) {
+    public TaskEntity createTask(createTaskDTO taskDTO) {
         TaskEntity newTask = new TaskEntity();
 
         newTask.setPriority(taskDTO.getPriority() != null ? taskDTO.getPriority() : MacroProcessor.parsePriority(taskDTO.getName()));
@@ -46,28 +45,11 @@ public class TaskService {
                 .orElseThrow(() -> new Exceptions.TaskNotFoundException(String.format("Задача с id: %s не найдена", id)));
     }
 
-    public TaskEntity updateTask(String id, TaskDTO taskDTO) {
+    public TaskEntity updateTask(String id, editTaskDTO taskDTO) {
         TaskEntity task = findById(id);
 
         if (taskDTO.getName() != null) {
-            String newName = MacroProcessor.clearName(taskDTO.getName());
-            if (!newName.equals(task.getName())) {
-                task.setName(newName);
-
-                if (taskDTO.getPriority() == null) {
-                    Priorities parsedPriority = MacroProcessor.parsePriority(taskDTO.getName());
-                    if (parsedPriority != task.getPriority()) {
-                        task.setPriority(parsedPriority);
-                    }
-                }
-
-                if (taskDTO.getDeadline() == null) {
-                    LocalDate parsedDeadline = MacroProcessor.parseDeadline(taskDTO.getName());
-                    if (parsedDeadline != null && !parsedDeadline.equals(task.getDeadline())) {
-                        task.setDeadline(parsedDeadline);
-                    }
-                }
-            }
+            task.setName(taskDTO.getName());
         }
 
         if (taskDTO.getPriority() != null) {

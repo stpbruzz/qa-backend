@@ -9,8 +9,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Getter
-@Setter(AccessLevel.PRIVATE)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
 @Entity
 @Table(name = "Tasks")
 public class TaskEntity {
@@ -59,7 +58,7 @@ public class TaskEntity {
         }
     }
 
-    private void updateStatus() {
+    public void updateStatus() {
         if (this.status == Statuses.COMPLETED || this.status == Statuses.LATE) {
             if (this.deadline != null && LocalDate.now().isAfter(this.deadline)) {
                 this.status = Statuses.LATE;
@@ -76,20 +75,8 @@ public class TaskEntity {
         }
     }
 
-    protected void setName(String name) {
-        this.name = name;
-    }
-
-    protected void setDescription(String description) {
-        this.description = description;
-    }
-
-    protected void setDeadline(LocalDate deadline) {
+    public void setDeadline(LocalDate deadline) {
         this.deadline = deadline;
         updateStatus();
-    }
-
-    protected void setPriority(Priorities priority) {
-        this.priority = priority;
     }
 }

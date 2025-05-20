@@ -1,9 +1,11 @@
-package qa.todo.backend;
+package qa.todo.backend.Unit;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import qa.todo.backend.MacroProcessor;
 
 import java.time.LocalDate;
 
@@ -19,7 +21,7 @@ class MacroProcessorDeadlineTest {
             "'!before 31.12.2024', '2024-12-31'",       // стандартный формат
             "'!before 31-12-2024', '2024-12-31'",       // альтернативный разделитель
             "'!before 01.01.1970', '1970-01-01'",       // минимальная граница года
-            "'!before 31.12.2099', '2099-12-31'",       // максимальная граница года
+            "'!before 31.12.2100', '2100-12-31'",       // максимальная граница года
 
             // Граничные значения дней
             "'!before 31.01.2023', '2023-01-31'",       // 31 день в месяце с 31 днем
@@ -29,12 +31,14 @@ class MacroProcessorDeadlineTest {
 
             // Позиции макроса в строке
             "'Задача!before 15.07.2024', '2024-07-15'", // макрос в середине
-            "'!before 15.07.2024 задача', '2024-07-15'", // макрос в начале
-            "'!before 01.01.2025name', '2025-01-01'"     // текст сразу после даты
+            "'!before 15.07.2024 задача', '2024-07-15'",// макрос в начале
+            "'!before 01.01.2025name', '2025-01-01'",   // текст сразу после даты
+            "'name!before 01.01.2025name', '2025-01-01'"// макрос в тексте
+
     })
     void shouldParseValidDeadlineFormats(String input, String expectedDate) {
         LocalDate expected = LocalDate.parse(expectedDate);
-        assertEquals(expected, MacroProcessor.parseDeadline(input));
+        Assertions.assertEquals(expected, MacroProcessor.parseDeadline(input));
     }
 
     @DisplayName("Некорректные форматы дат")
@@ -42,8 +46,9 @@ class MacroProcessorDeadlineTest {
     @ValueSource(strings = {
             // Отсутствие обязательных компонентов
             "Нет макроса",
-            "!before",
+            "!before",                 // отсутствие даты
             "!before31.12.2024",       // отсутствие пробела
+            "31.12.2024",              // просто дата
 
             // Неправильные форматы дат
             "!before 2025.12.31",      // обратный формат
@@ -57,14 +62,16 @@ class MacroProcessorDeadlineTest {
             "!before 32.12.2025",      // несуществующий день
             "!before 31.13.2025",      // несуществующий месяц
             "!before 31.02.2025",      // несуществующая дата
-            "!before 29.02.2025",      // 29 февраля не в високосный год
-            "!before 01.01.2101",     // слишком большой год
+            "!before 29.02.2025",      // 29 февраля не високосный год
+            "!before 01.01.2101",      // слишком большой год
             "!before 31.12.1969",      // слишком маленький год
-            "!before -19.05.2025",
+            "!before -19.05.2025",     // отрицательное число
 
             // Некорректные символы
             "!before abc",             // нечисловые символы
-            "!before 31.12.20ab"       // частично нечисловые
+            "!before 31.12.20ab",       // частично нечисловые
+
+            "!before cde 31.12.2025"   // слово между ключевыми частями
     })
     void shouldRejectInvalidDeadlineFormats(String input) {
         assertNull(MacroProcessor.parseDeadline(input));

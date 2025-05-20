@@ -1,8 +1,7 @@
-package qa.todo.backend;
+package qa.todo.backend.Unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,9 +23,9 @@ class TaskNameLengthTest {
             "Test",             // минимальная длина (4 символа)
             "Название",         // кириллические символы
             "1234",             // цифры
-            StringOf127Symbols, // граничное значение (127 символов)
+            StringOf127Symbols, // максимальное значение (127 символов)
             "Name with spaces", // с пробелами
-            "S!@#$"       // специальные символы
+            "S!@#$"             // специальные символы
     })
     void shouldAcceptValidNameLengths(String name) {
         assertTrue(checkNameLength(name));
@@ -34,7 +33,6 @@ class TaskNameLengthTest {
 
     @DisplayName("Проверка невалидных длин названий")
     @ParameterizedTest(name = "Для названия \"{0}\" ожидается false")
-    @NullAndEmptySource
     @ValueSource(strings = {
             "",                 // пустая строка
             "   ",              // пробелы

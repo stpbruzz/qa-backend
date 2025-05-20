@@ -15,7 +15,7 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping("/create")
-    public ResponseEntity<TaskEntity> createTask(@Valid @RequestBody TaskDTO taskDTO) {
+    public ResponseEntity<TaskEntity> createTask(@Valid @RequestBody createTaskDTO taskDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createTask(taskDTO));
     }
 
@@ -48,7 +48,7 @@ public class TaskController {
     @PutMapping("/edit/{id}")
     public ResponseEntity<TaskEntity> editTask(
             @PathVariable String id,
-            @Valid @RequestBody TaskDTO taskDTO) {
+            @RequestBody editTaskDTO taskDTO) {
         return ResponseEntity.ok(taskService.updateTask(id, taskDTO));
     }
 

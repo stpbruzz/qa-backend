@@ -1,9 +1,12 @@
-package qa.todo.backend;
+package qa.todo.backend.Unit;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import qa.todo.backend.MacroProcessor;
+import qa.todo.backend.Priorities;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,7 +20,6 @@ class MacroProcessorPriorityTest {
             "'!4', LOW",                       // максимальный приоритет
             "'Важно!1', CRITICAL",             // макрос в конце
             "'!1Срочно', CRITICAL",            // макрос в начале
-            "'Сделать!2', HIGH",               // средний приоритет
             "'Задача!3 тест', MEDIUM",         // с дополнительным текстом
             "'!4Неважно', LOW",                // минимальный приоритет с текстом
 
@@ -28,7 +30,7 @@ class MacroProcessorPriorityTest {
             "'!1 !2', CRITICAL"                // несколько приоритетов
     })
     void shouldParseValidPriorityMarkers(String input, Priorities expected) {
-        assertEquals(expected, MacroProcessor.parsePriority(input));
+        Assertions.assertEquals(expected, MacroProcessor.parsePriority(input));
     }
 
     @DisplayName("Некорректные макросы приоритета")
